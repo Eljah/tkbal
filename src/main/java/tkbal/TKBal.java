@@ -2,6 +2,7 @@ package tkbal;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+import javax.microedition.io.HttpsConnection;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -12,9 +13,10 @@ import java.io.*;
 
 public class TKBal extends MIDlet implements CommandListener {
 
-    private Command cmd_exit;
-    private Command submit = new Command("Submit", Command.SCREEN, 1);
-
+    private Command cmd_exit=new Command("Выйти", Command.EXIT, 0);
+    private Command submit = new Command("Запросить", Command.SCREEN, 1);
+    private Command restart = new Command("Перезапустить", Command.SCREEN, 1);
+    String str = null;
     private Display display;
 
     private Form form;
@@ -116,6 +118,7 @@ public class TKBal extends MIDlet implements CommandListener {
             //geting captcha image
             connection.close();
             HttpConnection connection2 = (HttpConnection) Connector.open("http://81.23.146.8/" + str);
+            //todo remove this test value
             //HttpConnection connection2 = (HttpConnection) Connector.open("http://www.transkart.ru/111/img/btn_1.png");
             //http://www.transkart.ru/111/img/btn_1.png
             System.out.println("Status Line Code: " + connection2.getResponseCode());
@@ -197,7 +200,7 @@ public class TKBal extends MIDlet implements CommandListener {
 
         System.out.println("Starting app");
 
-        cmd_exit = new Command("Exit", Command.EXIT, 0);
+
         form.addCommand(cmd_exit);
         form.addCommand(submit);
 
@@ -224,6 +227,15 @@ public class TKBal extends MIDlet implements CommandListener {
     }
 
     public void commandAction(Command c, Displayable d) {
+        if (c == restart) {
+            try {
+                form.deleteAll();
+                startApp();
+            } catch (MIDletStateChangeException e) {
+                showException(e);
+            }
+        }
+
         if (c == cmd_exit) {
             try {
                 destroyApp(true);
@@ -234,7 +246,13 @@ public class TKBal extends MIDlet implements CommandListener {
         if (c == submit) {
             form.removeCommand(submit);
             String card = requestDataHttp();
-            card = card.substring(card.indexOf("Карта"));
+            //Код проверки введен с ошибкой
+            if (card.indexOf("Код проверки введен с ошибкой")==-1)
+            {
+            //Неверный ввод номера карты
+                if (card.indexOf("Неверный ввод номера карты")==-1)
+                {
+                    card = card.substring(card.indexOf("Карта"));
             ///Карта
             System.out.println(card);
             String money=card.substring(card.indexOf("с:")+2,card.indexOf("тар."));
@@ -255,17 +273,37 @@ public class TKBal extends MIDlet implements CommandListener {
             form.delete(0);
             form.delete(0);
             form.delete(0);
+                    form.addCommand(restart);
 
 
             form.append(responce);
             form.append(responce2);
             form.append(responce3);
             form.append(responce4);
+                }
+                else
+                {
+                    form.delete(0);
+                    form.delete(0);
+                    form.delete(0);
+                    form.append("Неверный ввод номера карты");
+                    form.addCommand(restart);
+                } }
+                    else
+                {
+                    form.delete(0);
+                    form.delete(0);
+                    form.delete(0);
+                    form.append("Код проверки введен с ошибкой");
+                    form.addCommand(restart);
+                }
         }
     }
 
     public String requestDataHttp() {
-        String str = null;
+
+        Thread t = new Thread() {
+            public void run() {
         try {
             try {
                 rs = RecordStore.openRecordStore("tknumber", true);
@@ -357,7 +395,9 @@ public class TKBal extends MIDlet implements CommandListener {
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-
+            }
+        };
+        t.run();
 
         return str;
     }

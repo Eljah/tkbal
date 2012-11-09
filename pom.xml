@@ -14,7 +14,7 @@
     <name>tkbal J2ME Application</name>
 
  	<organization>
- 		<name>Your Name Here</name>
+ 		<name>Eljah</name>
 	</organization>
 
     <properties>
@@ -24,7 +24,7 @@
 
         <j2me.midlet.vendor>${project.organization.name}</j2me.midlet.vendor>
         <j2me.midlet.name>${project.name}</j2me.midlet.name>
-        <j2me.midlet.version>1.0</j2me.midlet.version>
+        <j2me.midlet.version>0.2</j2me.midlet.version>
         <j2me.midlet.configuration>CLDC-1.1</j2me.midlet.configuration>
         <j2me.midlet.profile>MIDP-2.0</j2me.midlet.profile>
 
@@ -115,7 +115,7 @@
                     <obfuscate>true</obfuscate>
                     <jadAttributes>
                         <MIDlet-Vendor>${project.organization.name}</MIDlet-Vendor>
-                        <Created-By>your name here</Created-By>
+                        <Created-By>Eljah</Created-By>
                         <MIDlet-Permissions>javax.microedition.io.Connector.http</MIDlet-Permissions>
 						<!--
 						To ask the platform to optionally grant permissions provided certain API-subsets are available, use:
@@ -125,8 +125,8 @@
                     <midlets>
 						<!-- for each MIDlet entry-point, simply reiterate this section -->
                         <MIDlet>
-                            <name>SimpleAppCaptPhoto</name>
-                            <icon>/pyx.png</icon>
+                            <name>?????? ???????????? ?????</name>
+                            <icon>/logo.png</icon>
                             <!--<class>tkbal.TKBal</class>-->
                             <class>tkbal.TKBal</class>
                         </MIDlet>

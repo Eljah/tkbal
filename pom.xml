@@ -126,7 +126,7 @@
 						<!-- for each MIDlet entry-point, simply reiterate this section -->
                         <MIDlet>
                             <name>?????? ???????????? ?????</name>
-                            <icon>/logo.png</icon>
+                            <icon>/tk.png</icon>
                             <!--<class>tkbal.TKBal</class>-->
                             <class>tkbal.TKBal</class>
                         </MIDlet>

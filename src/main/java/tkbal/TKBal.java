@@ -13,7 +13,8 @@ import java.io.*;
 
 public class TKBal extends MIDlet implements CommandListener {
 
-    private Command cmd_exit=new Command("Выйти", Command.EXIT, 0);
+
+    private Command cmd_exit = new Command("Выйти", Command.EXIT, 0);
     private Command submit = new Command("Запросить", Command.SCREEN, 1);
     private Command restart = new Command("Перезапустить", Command.SCREEN, 1);
     String str = null;
@@ -92,7 +93,7 @@ public class TKBal extends MIDlet implements CommandListener {
                     } */
                 }
                 str = sb.toString();
-
+                inputstream.close();
             }
             System.out.println(str);
 
@@ -171,6 +172,7 @@ public class TKBal extends MIDlet implements CommandListener {
         try {
             rs = RecordStore.openRecordStore("tknumber", true);
             if (rs.getNumRecords() > 0) {
+                System.out.println(rs.getRecord(1).toString());
                 InputStream is = new ByteArrayInputStream(rs.getRecord(1));
 
                 int ch = -1;
@@ -185,6 +187,7 @@ public class TKBal extends MIDlet implements CommandListener {
                 String outrs = sb1.toString();
                 System.out.println(outrs);
                 number.setString(outrs);
+                is.close();
             }
             rs.closeRecordStore();
         } catch (RecordStoreException e) {
@@ -195,7 +198,7 @@ public class TKBal extends MIDlet implements CommandListener {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         display = Display.getDisplay(this);
-        form = new Form("Simple");
+        form = new Form("Баланс транспортной карты");
         form.setCommandListener(this);
 
         System.out.println("Starting app");
@@ -215,6 +218,7 @@ public class TKBal extends MIDlet implements CommandListener {
 
         accessHttp();
         form.append(captcha);
+        captcha.setString("");
         display.setCurrent(form);
     }
 
@@ -228,6 +232,7 @@ public class TKBal extends MIDlet implements CommandListener {
 
     public void commandAction(Command c, Displayable d) {
         if (c == restart) {
+            form.removeCommand(restart);
             try {
                 form.deleteAll();
                 startApp();
@@ -247,154 +252,187 @@ public class TKBal extends MIDlet implements CommandListener {
             form.removeCommand(submit);
             String card = requestDataHttp();
             //Код проверки введен с ошибкой
-            if (card.indexOf("Код проверки введен с ошибкой")==-1)
-            {
-            //Неверный ввод номера карты
-                if (card.indexOf("Неверный ввод номера карты")==-1)
-                {
-                    card = card.substring(card.indexOf("Карта"));
-            ///Карта
-            System.out.println(card);
-            String money=card.substring(card.indexOf("с:")+2,card.indexOf("тар."));
-            System.out.println(money);
-            String lastTransport=card.substring(card.indexOf("е:")+2,card.indexOf("Операция"));
-            System.out.println(lastTransport);
-            String lastIncome=card.substring(card.indexOf("я:")+2);
-            System.out.println(lastIncome);
-            String dateEnd=card.substring(card.indexOf("по ")+3,card.indexOf("Ресурс"));
-            System.out.println(dateEnd);
-            StringItem responce = new StringItem("Состояние счета", money);
-            StringItem responce2 = new StringItem("Последняя операция списания", lastTransport);
-            StringItem responce3 = new StringItem("Последняя операция зачисления", lastIncome);
-            StringItem responce4 = new StringItem("Карта действует до", dateEnd);
+            try {
+            if (card.indexOf("Код проверки введен с ошибкой") == -1) {
+                //Неверный ввод номера карты
+                if (card.indexOf("Неверный ввод номера карты") == -1) {
+                    //Введите номер карты
+                    if (card.indexOf("Введите номер карты") == -1) {
+                        card = card.substring(card.indexOf("Карта"));
+
+                        ///Карта
+                        System.out.println(card);
+                        String money = card.substring(card.indexOf("с:") + 2, card.indexOf("тар."));
+                        System.out.println(money);
+                        String lastTransport = card.substring(card.indexOf("е:") + 2, card.indexOf("Операция"));
+                        System.out.println(lastTransport);
+                        String lastIncome = card.substring(card.indexOf("я:") + 2);
+                        System.out.println(lastIncome);
+                        String dateEnd = card.substring(card.indexOf("по ") + 3, card.indexOf("Ресурс"));
+                        System.out.println(dateEnd);
+                        StringItem responce = new StringItem("Состояние счета", money);
+                        StringItem responce2 = new StringItem("Последняя операция списания", lastTransport);
+                        StringItem responce3 = new StringItem("Последняя операция зачисления", lastIncome);
+                        StringItem responce4 = new StringItem("Карта действует до", dateEnd);
 //Ñâîéñòâà ïðîåçäíîãî áèëåòàÂâåäèòå ïàðàìåòðû Íîìåð êàðòû    &nbsp;Êîä ïðîâåðêè       Êàðòà ¹ 3895232407Ïðîåçäíîé áèëåò:Ýëåêòðîííûé êîøåëåêÄåéñòâóåòc 01.11.2012 ïî 01.11.2014Ðåñóðñ ñåé÷àñ:496 òàð.åä. Ïîñëåäíåå ïðåäúÿâëåíèå â òðàíñïîðòå:06.11.2012 10:26:00Ìàðøðóò:Äóáëèðóþùèé Ìàðøðóò ¹21Âèä òðàíñïîðòàÒðîëëåéáóñûÎïåðàöèÿÏðîõîä ñî ñïèñàíèåì ðåñóðñàÄàòà è âðåìÿ ïîïîëíåíèÿ:01.11.2012 10:29:00Ïóíêò ïîïîëíåíèÿÃëàâïî÷òàìò óë. Êðåìëåâñêàÿ ä.8, ÀÐÌ/êèîñê 20911Ðåñóðñ ïîïîëíåí íà:500 òàð.åä.
-            //responce.setString();
+                        //responce.setString();
 
-            form.delete(0);
-            form.delete(0);
-            form.delete(0);
-                    form.addCommand(restart);
+                        form.delete(0);
+                        form.delete(0);
+                        form.delete(0);
+                        form.addCommand(restart);
 
 
-            form.append(responce);
-            form.append(responce2);
-            form.append(responce3);
-            form.append(responce4);
-                }
-                else
-                {
+                        form.append(responce);
+                        form.append(responce2);
+                        form.append(responce3);
+                        form.append(responce4);
+
+                    } else {
+                        form.delete(0);
+                        form.delete(0);
+                        form.delete(0);
+                        form.append("Введите номер карты");
+                        captcha.setString("");
+                        form.addCommand(restart);
+                    }
+                } else {
                     form.delete(0);
                     form.delete(0);
                     form.delete(0);
                     form.append("Неверный ввод номера карты");
-                    form.addCommand(restart);
-                } }
-                    else
-                {
-                    form.delete(0);
-                    form.delete(0);
-                    form.delete(0);
-                    form.append("Код проверки введен с ошибкой");
+                    captcha.setString("");
                     form.addCommand(restart);
                 }
+            } else {
+                form.delete(0);
+                form.delete(0);
+                form.delete(0);
+                form.append("Код проверки введен с ошибкой");
+                captcha.setString("");
+                form.addCommand(restart);
+            }
+            }
+            catch (StringIndexOutOfBoundsException e)
+            {
+                form.delete(0);
+                form.delete(0);
+                form.delete(0);
+                form.append("Введите правильный номер карты");
+                captcha.setString("");
+                form.addCommand(restart);
+            }
+            catch (NullPointerException e)
+            {
+                form.delete(0);
+                form.delete(0);
+                form.delete(0);
+                form.append("Введите правильный номер карты");
+                captcha.setString("");
+                form.addCommand(restart);
+            }
         }
+
     }
 
     public String requestDataHttp() {
 
         Thread t = new Thread() {
             public void run() {
-        try {
-            try {
-                rs = RecordStore.openRecordStore("tknumber", true);
-                System.out.println(rs.getNumRecords());
-                if (rs.getNumRecords() == 0) {
-                    rs.addRecord(number.getString().getBytes("UTF-8"), 0, number.getString().getBytes("UTF-8").length);
-                } else {
-                    rs.setRecord(1, number.getString().getBytes("UTF-8"), 0, number.getString().getBytes("UTF-8").length);
+                try {
+                    try {
+                        rs = RecordStore.openRecordStore("tknumber", true);
+                        System.out.println(rs.getNumRecords());
+                        if (number.getString().length()>5){
+                        if ((rs.getNumRecords() == 0)) {
+                            rs.addRecord(number.getString().getBytes("UTF-8"), 0, number.getString().getBytes("UTF-8").length);
+                        } else {
+                            rs.setRecord(1, number.getString().getBytes("UTF-8"), 0, number.getString().getBytes("UTF-8").length);
+                        }}
+                        rs.closeRecordStore();
+                    } catch (RecordStoreException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    HttpConnection connection3 = (HttpConnection) Connector.open("http://81.23.146.8/default.aspx", Connector.READ_WRITE);
+                    connection3.setRequestMethod(HttpConnection.POST);
+                    connection3.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    String strToPost = "cardnum" + "=" + number.getString() + "&" + "checkcode" + "=" + captcha.getString() + "&" + "__EVENTVALIDATION" + "=" + URLEncoder.encode(eventvalidation) + "&" + "__VIEWSTATE" + "=" + URLEncoder.encode(viewstate);
+                    OutputStream os = connection3.openDataOutputStream();
+                    System.out.println(strToPost);
+                    os.write(strToPost.getBytes());
+                    System.out.println("Status Line Code: " + connection3.getResponseCode());
+                    System.out.println("Status Line Message: " + connection3.getResponseMessage());
+                    //if ((connection.getResponseCode() == HttpConnection.HTTP_OK)||(connection.getResponseCode() == 302)) {
+                    System.out.println(
+                            connection3.getHeaderField(0) + " " + connection3.getHeaderFieldKey(0));
+                    System.out.println(
+                            "Header Field Date: " + connection3.getHeaderField("date"));
+                    System.out.println(
+                            "Header Field Date: " + connection3.getHeaderField("Content-Type"));
+                    InputStream inputstream = connection3.openInputStream();
+                    int length = (int) connection3.getLength();
+                    System.out.println("Responce size (chars)" + connection3.getLength());
+                    if (length != -1) {
+                        byte incomingData[] = new byte[length];
+                        //inputstream.read(incomingData);
+                        //str = new String(incomingData);
+                        Reader r = new InputStreamReader(inputstream, "UTF-8");
+                        StringBuffer sb = new StringBuffer();
+                        boolean tagflag = false;
+                        int ch;
+
+                        while ((ch = r.read()) != -1) {
+                            if ((char) ch == '<') {
+                                tagflag = true;
+                            }
+
+                            if ((!tagflag) && ((char) ch != '\n')) {
+                                sb.append((char) ch);
+                            }
+
+                            if ((!tagflag) && ((char) ch == '\n')) {
+                                sb.append(' ');
+                            }
+
+                            if ((char) ch == '>') {
+                                tagflag = false;
+                            }
+                        }
+                        str = sb.toString();
+
+
+                    } else {
+
+                        System.out.println("Something went wrong");
+                        byte incomingData[] = new byte[length];
+                        //inputstream.read(incomingData);
+                        //str = new String(incomingData);
+                        Reader r = new InputStreamReader(inputstream, "windows-1251");
+                        StringBuffer sb = new StringBuffer();
+                        int ch;
+                        boolean tagflag = false;
+                        while ((ch = r.read()) != -1) {
+                            /*    if ((char) ch == '<') {
+                                tagflag = true;
+                            }
+                            */
+                            if ((char) ch != '\n')
+                                sb.append((char) ch);
+                            /*}
+
+                           if ((char) ch == '>') {
+                               tagflag = false;
+                           } */
+                        }
+                        str = sb.toString();
+
+                    }
+                    System.out.println(str);
+                    inputstream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
-                rs.closeRecordStore();
-            } catch (RecordStoreException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            HttpConnection connection3 = (HttpConnection) Connector.open("http://81.23.146.8/default.aspx",Connector.READ_WRITE);
-            connection3.setRequestMethod(HttpConnection.POST);
-            connection3.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            String strToPost = "cardnum" + "=" + number.getString() + "&" + "checkcode" + "=" + captcha.getString() + "&" + "__EVENTVALIDATION" + "=" + URLEncoder.encode(eventvalidation) + "&" + "__VIEWSTATE" + "=" + URLEncoder.encode(viewstate);
-            OutputStream os = connection3.openDataOutputStream();
-            System.out.println(strToPost);
-            os.write(strToPost.getBytes());
-            System.out.println("Status Line Code: " + connection3.getResponseCode());
-            System.out.println("Status Line Message: " + connection3.getResponseMessage());
-            //if ((connection.getResponseCode() == HttpConnection.HTTP_OK)||(connection.getResponseCode() == 302)) {
-            System.out.println(
-                    connection3.getHeaderField(0) + " " + connection3.getHeaderFieldKey(0));
-            System.out.println(
-                    "Header Field Date: " + connection3.getHeaderField("date"));
-            System.out.println(
-                    "Header Field Date: " + connection3.getHeaderField("Content-Type"));
-            InputStream inputstream = connection3.openInputStream();
-            int length = (int) connection3.getLength();
-            System.out.println("Responce size (chars)" + connection3.getLength());
-            if (length != -1) {
-                byte incomingData[] = new byte[length];
-                //inputstream.read(incomingData);
-                //str = new String(incomingData);
-                Reader r = new InputStreamReader(inputstream, "UTF-8");
-                StringBuffer sb = new StringBuffer();
-                boolean tagflag = false;
-                int ch;
 
-                while ((ch = r.read()) != -1) {
-                    if ((char) ch == '<') {
-                        tagflag = true;
-                    }
-
-                    if ((!tagflag) && ((char) ch != '\n')) {
-                        sb.append((char) ch);
-                    }
-
-                    if ((!tagflag) && ((char) ch == '\n')) {
-                        sb.append(' ');
-                    }
-
-                    if ((char) ch == '>') {
-                        tagflag = false;
-                    }
-                }
-                str = sb.toString();
-
-            } else {
-
-                System.out.println("Something went wrong");
-                byte incomingData[] = new byte[length];
-                //inputstream.read(incomingData);
-                //str = new String(incomingData);
-                Reader r = new InputStreamReader(inputstream, "windows-1251");
-                StringBuffer sb = new StringBuffer();
-                int ch;
-                boolean tagflag = false;
-                while ((ch = r.read()) != -1) {
-                    /*    if ((char) ch == '<') {
-                      tagflag = true;
-                  }
-                  */
-                    if ((char) ch != '\n')
-                        sb.append((char) ch);
-                    /*}
-
-                    if ((char) ch == '>') {
-                        tagflag = false;
-                    } */
-                }
-                str = sb.toString();
-
-            }
-            System.out.println(str);
-
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
             }
         };
         t.run();
